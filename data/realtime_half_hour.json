@@ -1,0 +1,338 @@
+[
+  {
+    "label": "00:00",
+    "hour": 0,
+    "minute": 0,
+    "price": 0.334,
+    "load": 650
+  },
+  {
+    "label": "00:30",
+    "hour": 0,
+    "minute": 30,
+    "price": 0.33,
+    "load": 661
+  },
+  {
+    "label": "01:00",
+    "hour": 1,
+    "minute": 0,
+    "price": 0.335,
+    "load": 671
+  },
+  {
+    "label": "01:30",
+    "hour": 1,
+    "minute": 30,
+    "price": 0.347,
+    "load": 681
+  },
+  {
+    "label": "02:00",
+    "hour": 2,
+    "minute": 0,
+    "price": 0.367,
+    "load": 689
+  },
+  {
+    "label": "02:30",
+    "hour": 2,
+    "minute": 30,
+    "price": 0.392,
+    "load": 695
+  },
+  {
+    "label": "03:00",
+    "hour": 3,
+    "minute": 0,
+    "price": 0.42,
+    "load": 699
+  },
+  {
+    "label": "03:30",
+    "hour": 3,
+    "minute": 30,
+    "price": 0.448,
+    "load": 700
+  },
+  {
+    "label": "04:00",
+    "hour": 4,
+    "minute": 0,
+    "price": 0.473,
+    "load": 699
+  },
+  {
+    "label": "04:30",
+    "hour": 4,
+    "minute": 30,
+    "price": 0.493,
+    "load": 695
+  },
+  {
+    "label": "05:00",
+    "hour": 5,
+    "minute": 0,
+    "price": 0.505,
+    "load": 690
+  },
+  {
+    "label": "05:30",
+    "hour": 5,
+    "minute": 30,
+    "price": 0.51,
+    "load": 682
+  },
+  {
+    "label": "06:00",
+    "hour": 6,
+    "minute": 0,
+    "price": 0.546,
+    "load": 673
+  },
+  {
+    "label": "06:30",
+    "hour": 6,
+    "minute": 30,
+    "price": 0.533,
+    "load": 663
+  },
+  {
+    "label": "07:00",
+    "hour": 7,
+    "minute": 0,
+    "price": 0.514,
+    "load": 652
+  },
+  {
+    "label": "07:30",
+    "hour": 7,
+    "minute": 30,
+    "price": 0.489,
+    "load": 640
+  },
+  {
+    "label": "08:00",
+    "hour": 8,
+    "minute": 0,
+    "price": 0.461,
+    "load": 750
+  },
+  {
+    "label": "08:30",
+    "hour": 8,
+    "minute": 30,
+    "price": 0.434,
+    "load": 740
+  },
+  {
+    "label": "09:00",
+    "hour": 9,
+    "minute": 0,
+    "price": 0.409,
+    "load": 732
+  },
+  {
+    "label": "09:30",
+    "hour": 9,
+    "minute": 30,
+    "price": 0.388,
+    "load": 726
+  },
+  {
+    "label": "10:00",
+    "hour": 10,
+    "minute": 0,
+    "price": 0.535,
+    "load": 722
+  },
+  {
+    "label": "10:30",
+    "hour": 10,
+    "minute": 30,
+    "price": 0.53,
+    "load": 720
+  },
+  {
+    "label": "11:00",
+    "hour": 11,
+    "minute": 0,
+    "price": 0.534,
+    "load": 721
+  },
+  {
+    "label": "11:30",
+    "hour": 11,
+    "minute": 30,
+    "price": 0.546,
+    "load": 724
+  },
+  {
+    "label": "12:00",
+    "hour": 12,
+    "minute": 0,
+    "price": 0.565,
+    "load": 729
+  },
+  {
+    "label": "12:30",
+    "hour": 12,
+    "minute": 30,
+    "price": 0.59,
+    "load": 737
+  },
+  {
+    "label": "13:00",
+    "hour": 13,
+    "minute": 0,
+    "price": 0.617,
+    "load": 746
+  },
+  {
+    "label": "13:30",
+    "hour": 13,
+    "minute": 30,
+    "price": 0.645,
+    "load": 756
+  },
+  {
+    "label": "14:00",
+    "hour": 14,
+    "minute": 0,
+    "price": 0.67,
+    "load": 767
+  },
+  {
+    "label": "14:30",
+    "hour": 14,
+    "minute": 30,
+    "price": 0.691,
+    "load": 778
+  },
+  {
+    "label": "15:00",
+    "hour": 15,
+    "minute": 0,
+    "price": 0.544,
+    "load": 789
+  },
+  {
+    "label": "15:30",
+    "hour": 15,
+    "minute": 30,
+    "price": 0.55,
+    "load": 798
+  },
+  {
+    "label": "16:00",
+    "hour": 16,
+    "minute": 0,
+    "price": 0.547,
+    "load": 807
+  },
+  {
+    "label": "16:30",
+    "hour": 16,
+    "minute": 30,
+    "price": 0.535,
+    "load": 813
+  },
+  {
+    "label": "17:00",
+    "hour": 17,
+    "minute": 0,
+    "price": 0.516,
+    "load": 818
+  },
+  {
+    "label": "17:30",
+    "hour": 17,
+    "minute": 30,
+    "price": 0.492,
+    "load": 820
+  },
+  {
+    "label": "18:00",
+    "hour": 18,
+    "minute": 0,
+    "price": 0.654,
+    "load": 819
+  },
+  {
+    "label": "18:30",
+    "hour": 18,
+    "minute": 30,
+    "price": 0.627,
+    "load": 817
+  },
+  {
+    "label": "19:00",
+    "hour": 19,
+    "minute": 0,
+    "price": 0.601,
+    "load": 812
+  },
+  {
+    "label": "19:30",
+    "hour": 19,
+    "minute": 30,
+    "price": 0.58,
+    "load": 804
+  },
+  {
+    "label": "20:00",
+    "hour": 20,
+    "minute": 0,
+    "price": 0.566,
+    "load": 796
+  },
+  {
+    "label": "20:30",
+    "hour": 20,
+    "minute": 30,
+    "price": 0.56,
+    "load": 785
+  },
+  {
+    "label": "21:00",
+    "hour": 21,
+    "minute": 0,
+    "price": 0.563,
+    "load": 775
+  },
+  {
+    "label": "21:30",
+    "hour": 21,
+    "minute": 30,
+    "price": 0.574,
+    "load": 763
+  },
+  {
+    "label": "22:00",
+    "hour": 22,
+    "minute": 0,
+    "price": 0.403,
+    "load": 633
+  },
+  {
+    "label": "22:30",
+    "hour": 22,
+    "minute": 30,
+    "price": 0.427,
+    "load": 623
+  },
+  {
+    "label": "23:00",
+    "hour": 23,
+    "minute": 0,
+    "price": 0.454,
+    "load": 614
+  },
+  {
+    "label": "23:30",
+    "hour": 23,
+    "minute": 30,
+    "price": 0.482,
+    "load": 607
+  }
+]

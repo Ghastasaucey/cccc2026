@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>智能电价预测与决策系统</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    window.APP_META = {
+      projectName: "智能电价预测与决策系统",
+      version: "v2.1.0",
+      chartJsVersion: "4.4.1",
+      tailwindSource: "tailwindcss CDN"
+    };
+  </script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: "#165DFF",
+            bgsoft: "#F5F7FA",
+            mint: "#36D399",
+            ink: "#0F172A",
+            line: "#E5EAF3",
+            alert: "#F76659",
+            amber: "#FFB020"
+          },
+          fontFamily: {
+            sans: ["Inter", "Microsoft YaHei", "ui-sans-serif", "system-ui", "sans-serif"]
+          },
+          borderRadius: {
+            panel: "8px"
+          },
+          boxShadow: {
+            card: "0 10px 28px rgba(15,23,42,0.08)",
+            soft: "0 10px 30px rgba(22,93,255,0.14)"
+          }
+        }
+      }
+    };
+  </script>
+  <!-- Chart.js version: 4.4.1 -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <style>
+    html { scroll-behavior: smooth; }
+    ::-webkit-scrollbar { width: 8px; height: 8px; }
+    ::-webkit-scrollbar-thumb { background: rgba(148, 163, 184, 0.55); border-radius: 999px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+  </style>
+</head>
+<body class="min-h-screen overflow-hidden bg-gradient-to-br from-[#EAF2FF] via-bgsoft to-[#EEF4F2] font-sans text-ink">
+  <div id="appStateOverlay" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-950/45 px-6 backdrop-blur-sm">
+    <div class="w-full max-w-xl rounded-panel border border-white/30 bg-white p-8 text-center shadow-card">
+      <div id="overlayBadge" class="mx-auto mb-4 inline-flex rounded-full bg-primary/10 px-3 py-1 text-xs font-medium text-primary">系统状态</div>
+      <h2 id="overlayTitle" class="text-2xl font-semibold text-slate-900">正在加载数据资源</h2>
+      <p id="overlayMessage" class="mt-3 text-sm leading-7 text-slate-500">系统正在读取本地数据集、模块配置和可视化资源，请稍候。</p>
+      <div id="overlayActions" class="mt-6 hidden justify-center gap-3">
+        <button id="retryLoadBtn" class="rounded-panel bg-primary px-4 py-2 text-sm font-medium text-white">重新加载</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="pointer-events-none fixed inset-0 overflow-hidden">
+    <div class="absolute -left-20 top-24 h-72 w-72 rounded-full bg-primary/10 blur-3xl"></div>
+    <div class="absolute right-10 top-36 h-60 w-60 rounded-full bg-mint/10 blur-3xl"></div>
+    <div class="absolute bottom-12 left-1/3 h-72 w-72 rounded-full bg-primary/5 blur-3xl"></div>
+  </div>
+
+  <header class="fixed inset-x-0 top-0 z-40 border-b border-white/60 bg-white/85 backdrop-blur-xl">
+    <div class="flex h-[72px] items-center justify-between px-6">
+      <div class="flex items-center gap-4">
+        <div class="flex h-11 w-11 items-center justify-center rounded-panel bg-primary text-white shadow-soft">
+          <span class="text-xl">⚡</span>
+        </div>
+        <div>
+          <div class="flex items-center gap-3">
+            <h1 class="text-[20px] font-semibold tracking-tight">智能电价预测与决策系统</h1>
+            <span class="rounded-full bg-primary/10 px-3 py-1 text-[12px] font-medium text-primary">大赛展示源码版</span>
+          </div>
+          <p class="text-[12px] text-slate-500">实时监控 · 历史分析 · 价格预测 · 场景决策 · 模型对比</p>
+        </div>
+      </div>
+      <nav id="topNav" class="flex items-center gap-2"></nav>
+    </div>
+  </header>
+
+  <aside id="sidebar" class="fixed bottom-9 left-0 top-[72px] z-30 flex w-[250px] flex-col border-r border-white/60 bg-white/80 px-4 py-5 backdrop-blur-xl transition-all duration-300">
+    <div class="mb-5 flex items-center justify-between px-2">
+      <div id="sidebarTitle" class="text-[12px] font-semibold uppercase tracking-[0.22em] text-slate-400">Modules</div>
+      <button id="toggleSidebar" class="rounded-panel border border-line bg-white p-2 text-slate-500 transition hover:border-primary/30 hover:text-primary">
+        <span>◀</span>
+      </button>
+    </div>
+      <div id="sideNav" class="flex-1 space-y-2"></div>
+      <div class="mt-5 rounded-panel border border-primary/10 bg-primary/5 p-4">
+      <p class="side-text text-[12px] font-semibold text-primary">源码包说明</p>
+      <div class="side-text mt-2 space-y-2 text-[12px] leading-6 text-slate-500">
+        <p>1. `data/` 下提供 JSON 与 CSV 模拟数据集</p>
+        <p>2. `js/modules/` 对应功能模块源码</p>
+        <p>3. 使用 `start_python_server.bat` 或 `start_no_python_server.bat` 可本地运行</p>
+      </div>
+    </div>
+  </aside>
+
+  <main id="mainContent" class="fixed inset-x-0 bottom-9 top-[72px] overflow-y-auto px-6 py-6 transition-all duration-300" style="left:250px">
+    <section id="page-home" class="page-section space-y-6">
+      <div class="grid grid-cols-12 gap-6">
+        <div class="col-span-8 rounded-panel border border-white/70 bg-white/85 p-6 shadow-card backdrop-blur">
+          <div class="flex items-start justify-between gap-4">
+            <div>
+              <div class="mb-3 inline-flex items-center gap-2 rounded-full bg-primary/10 px-3 py-1 text-[12px] font-medium text-primary">
+                <span class="h-2 w-2 rounded-full bg-mint"></span>
+                可执行前端原型
+              </div>
+              <h2 class="text-[28px] font-semibold leading-tight text-slate-900">面向比赛提交的完整前端源码与数据材料</h2>
+              <p class="mt-3 max-w-3xl text-[14px] leading-7 text-slate-500">
+                当前版本提供完整的静态前端源码、模块脚本、模拟数据集和本地启动脚本，可直接作为“素材与源码”目录中的展示型工程。系统围绕电价预测、负荷分析、模型评估和决策建议构建。
+              </p>
+            </div>
+            <div class="rounded-panel border border-line bg-bgsoft px-4 py-3 text-right text-[12px] text-slate-500">
+              <div>适配分辨率</div>
+              <div class="mt-1 font-semibold text-primary">1920 × 1080</div>
+            </div>
+          </div>
+
+          <div class="mt-6 flex flex-wrap items-center gap-3">
+            <button id="quickStartBtn" class="rounded-panel bg-primary px-5 py-3 text-[14px] font-medium text-white shadow-soft transition hover:-translate-y-0.5">快速开始</button>
+            <button data-jump="predict" class="jump-btn rounded-panel border border-line bg-white px-5 py-3 text-[14px] font-medium text-slate-600 transition hover:border-primary/30 hover:text-primary">进入预测分析</button>
+            <button data-jump="decision" class="jump-btn rounded-panel border border-line bg-white px-5 py-3 text-[14px] font-medium text-slate-600 transition hover:border-primary/30 hover:text-primary">查看决策建议</button>
+            <button data-jump="compare" class="jump-btn rounded-panel border border-line bg-white px-5 py-3 text-[14px] font-medium text-slate-600 transition hover:border-primary/30 hover:text-primary">模型对比评估</button>
+          </div>
+
+          <div class="mt-8 grid grid-cols-4 gap-4" id="realtimeCards"></div>
+
+          <div class="mt-8 grid grid-cols-2 gap-5">
+            <div class="rounded-panel border border-line bg-white p-4">
+              <div class="mb-3 flex items-center justify-between">
+                <h3 class="text-[16px] font-semibold">实时电价趋势图</h3>
+                <div class="flex gap-2">
+                  <button class="grain-btn rounded-panel bg-primary px-3 py-1 text-[12px] font-medium text-white" data-grain="hour">每小时</button>
+                  <button class="grain-btn rounded-panel bg-bgsoft px-3 py-1 text-[12px] text-slate-500" data-grain="half">每30分钟</button>
+                </div>
+              </div>
+              <div class="h-[260px]" id="priceChartWrap"><canvas id="priceChart"></canvas></div>
+            </div>
+            <div class="rounded-panel border border-line bg-white p-4">
+              <div class="mb-3 flex items-center justify-between">
+                <h3 class="text-[16px] font-semibold">实时负荷趋势图</h3>
+                <span class="rounded-full bg-mint/10 px-3 py-1 text-[12px] font-medium text-mint">动态监控</span>
+              </div>
+              <div class="h-[260px]" id="loadChartWrap"><canvas id="loadChart"></canvas></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-span-4 space-y-6">
+          <div class="rounded-panel border border-white/70 bg-white/85 p-5 shadow-card backdrop-blur">
+            <div class="flex items-center justify-between">
+              <div>
+                <h3 class="text-[16px] font-semibold">大赛亮点</h3>
+                <p class="mt-1 text-[12px] text-slate-500">评委可直接看到的系统能力</p>
+              </div>
+              <span class="rounded-full bg-mint/10 px-3 py-1 text-[12px] font-medium text-mint">展示级</span>
+            </div>
+            <div class="mt-4 space-y-3">
+              <div class="rounded-panel border border-line bg-bgsoft p-4">
+                <p class="text-[14px] font-semibold">多源特征融合机制</p>
+                <p class="mt-1 text-[12px] leading-6 text-slate-500">融合电价、负荷、气象、节假日与异常事件信息，提升预测稳定性。</p>
+              </div>
+              <div class="rounded-panel border border-line bg-bgsoft p-4">
+                <p class="text-[14px] font-semibold">时空联合预测模型</p>
+                <p class="mt-1 text-[12px] leading-6 text-slate-500">同时刻画时间波动和场景差异，增强峰谷转折识别能力。</p>
+              </div>
+              <div class="rounded-panel border border-line bg-bgsoft p-4">
+                <p class="text-[14px] font-semibold">异常事件感知模块</p>
+                <p class="mt-1 text-[12px] leading-6 text-slate-500">将天气冲击、节假日和活动异常联动到预测与策略生成流程。</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="rounded-panel border border-white/70 bg-white/85 p-5 shadow-card backdrop-blur">
+            <div class="flex items-center justify-between">
+              <div>
+                <h3 class="text-[16px] font-semibold">系统日志</h3>
+                <p class="mt-1 text-[12px] text-slate-500">记录用户操作和模块执行情况</p>
+              </div>
+              <button id="clearLogsBtn" class="rounded-panel border border-line bg-white px-3 py-2 text-[12px]">清空</button>
+            </div>
+            <div id="logPanel" class="mt-4 h-[460px] space-y-3 overflow-y-auto"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="page-data" class="page-section hidden">
+      <div class="rounded-panel border border-white/70 bg-white/85 p-6 shadow-card">
+        <div class="flex items-center justify-between">
+          <div>
+            <h2 class="text-[24px] font-semibold">历史数据查询模块</h2>
+            <p class="mt-2 text-[14px] text-slate-500">支持条件过滤、趋势对比、搜索与导出，表格固定高度滚动。</p>
+          </div>
+          <button id="reloadHistoryBtn" class="rounded-panel bg-primary px-4 py-2 text-[14px] font-medium text-white">重新加载</button>
+        </div>
+        <div class="mt-6 grid grid-cols-12 gap-6">
+          <div class="col-span-5 rounded-panel border border-line bg-white p-4">
+            <div class="grid grid-cols-2 gap-3">
+              <input id="historyKeyword" type="text" placeholder="搜索日期或时段" class="rounded-panel border border-line px-3 py-2 text-sm" />
+              <select id="historyPageSize" class="rounded-panel border border-line px-3 py-2 text-sm">
+                <option value="10">每页 10 条</option>
+                <option value="20" selected>每页 20 条</option>
+                <option value="30">每页 30 条</option>
+              </select>
+            </div>
+            <div class="mt-4 grid grid-cols-2 gap-3">
+              <div class="rounded-panel border border-line bg-bgsoft p-3">
+                <p class="text-[11px] text-slate-400">数据条数</p>
+                <div id="historyCount" class="mt-2 text-xl font-semibold">0</div>
+              </div>
+              <div class="rounded-panel border border-line bg-bgsoft p-3">
+                <p class="text-[11px] text-slate-400">平均电价</p>
+                <div id="historyAvgPrice" class="mt-2 text-xl font-semibold text-primary">0.000</div>
+              </div>
+            </div>
+            <div class="mt-4 overflow-hidden rounded-panel border border-line">
+              <div class="max-h-[400px] overflow-auto">
+                <table class="min-w-full text-sm">
+                  <thead class="sticky top-0 bg-bgsoft text-left text-slate-500">
+                    <tr>
+                      <th class="px-3 py-3">日期</th>
+                      <th class="px-3 py-3">时间</th>
+                      <th class="px-3 py-3">电价</th>
+                      <th class="px-3 py-3">负荷</th>
+                      <th class="px-3 py-3">天气</th>
+                    </tr>
+                  </thead>
+                  <tbody id="historyTableBody" class="divide-y divide-line"></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+          <div class="col-span-7 rounded-panel border border-line bg-white p-4">
+            <div class="mb-3 flex items-center justify-between">
+              <h3 class="text-[16px] font-semibold">历史趋势对比图</h3>
+              <div class="flex gap-2">
+                <button class="history-metric-btn rounded-panel bg-primary px-3 py-1 text-[12px] font-medium text-white" data-history-metric="price">电价</button>
+                <button class="history-metric-btn rounded-panel bg-bgsoft px-3 py-1 text-[12px] text-slate-500" data-history-metric="load">负荷</button>
+              </div>
+            </div>
+            <div class="h-[420px]" id="historyChartWrap"><canvas id="historyChart"></canvas></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="page-predict" class="page-section hidden">
+      <div class="grid grid-cols-12 gap-6">
+        <div class="col-span-5 rounded-panel border border-white/70 bg-white/85 p-6 shadow-card">
+          <h2 class="text-[24px] font-semibold">预测参数设置模块</h2>
+          <div class="mt-6 grid grid-cols-2 gap-4">
+            <input id="predictStartDate" type="date" class="rounded-panel border border-line px-3 py-2.5 text-sm" />
+            <select id="predictDays" class="rounded-panel border border-line px-3 py-2.5 text-sm">
+              <option value="1">预测 1 天</option>
+              <option value="3" selected>预测 3 天</option>
+              <option value="5">预测 5 天</option>
+              <option value="7">预测 7 天</option>
+            </select>
+            <input id="predictTemp" type="number" min="-10" max="40" value="26" placeholder="气温" class="rounded-panel border border-line px-3 py-2.5 text-sm" />
+            <input id="predictHumidity" type="number" min="30" max="90" value="60" placeholder="湿度" class="rounded-panel border border-line px-3 py-2.5 text-sm" />
+            <input id="predictPeakLoad" type="number" min="500" max="1500" value="860" placeholder="负荷峰值" class="rounded-panel border border-line px-3 py-2.5 text-sm" />
+            <select id="predictHoliday" class="rounded-panel border border-line px-3 py-2.5 text-sm">
+              <option value="false">节假日：否</option>
+              <option value="true">节假日：是</option>
+            </select>
+            <select id="predictModel" class="col-span-2 rounded-panel border border-line px-3 py-2.5 text-sm">
+              <option value="LSTM">LSTM</option>
+              <option value="XGBoost">XGBoost</option>
+              <option value="LightGBM">LightGBM</option>
+              <option value="RandomForest">随机森林</option>
+            </select>
+          </div>
+          <p id="predictError" class="mt-2 hidden text-xs text-alert">请输入合理的预测参数。</p>
+          <div class="mt-6 flex gap-3">
+            <button id="resetPredictBtn" class="rounded-panel border border-line bg-white px-4 py-3 text-sm">重置参数</button>
+            <button id="runPredictBtn" class="rounded-panel bg-primary px-4 py-3 text-sm font-medium text-white">开始预测</button>
+            <button id="saveTemplateBtn" class="rounded-panel border border-line bg-white px-4 py-3 text-sm">保存模板</button>
+          </div>
+          <div class="mt-6 rounded-panel border border-line bg-white p-4">
+            <div class="mb-2 flex justify-between text-xs text-slate-500">
+              <span id="predictStatusText">等待启动</span>
+              <span id="predictPercentText">0%</span>
+            </div>
+            <div class="h-2 rounded-full bg-bgsoft">
+              <div id="predictProgressBar" class="h-2 rounded-full bg-gradient-to-r from-primary to-mint" style="width:0%"></div>
+            </div>
+            <div id="predictLogPanel" class="mt-4 h-[210px] space-y-2 overflow-y-auto rounded-panel border border-line bg-bgsoft p-3 text-xs"></div>
+          </div>
+        </div>
+
+        <div class="col-span-7 rounded-panel border border-white/70 bg-white/85 p-6 shadow-card">
+          <div class="flex items-start justify-between">
+            <div>
+              <h2 class="text-[24px] font-semibold">预测结果展示模块</h2>
+              <p class="mt-2 text-[14px] text-slate-500">显示预测概览、对比曲线、明细数据和评价指标。</p>
+            </div>
+            <div class="text-right text-xs text-slate-500">
+              <div>模型：<span id="resultModel">LSTM</span></div>
+              <div class="mt-1">准确率：<span id="resultAccuracy">91.7%</span></div>
+            </div>
+          </div>
+
+          <div class="mt-6 grid grid-cols-4 gap-4" id="forecastSummaryCards"></div>
+
+          <div class="mt-6 rounded-panel border border-line bg-white p-4">
+            <h3 class="mb-3 text-[16px] font-semibold">历史电价 + 预测电价对比折线图</h3>
+            <div class="h-[280px]" id="forecastChartWrap"><canvas id="forecastChart"></canvas></div>
+          </div>
+
+          <div class="mt-6 grid grid-cols-12 gap-6">
+            <div class="col-span-8 overflow-hidden rounded-panel border border-line bg-white">
+              <div class="max-h-[300px] overflow-auto">
+                <table class="min-w-full text-sm">
+                  <thead class="sticky top-0 bg-bgsoft text-left text-slate-500">
+                    <tr>
+                      <th class="px-3 py-3">日期</th>
+                      <th class="px-3 py-3">时段</th>
+                      <th class="px-3 py-3">预测电价</th>
+                      <th class="px-3 py-3">预测负荷</th>
+                      <th class="px-3 py-3">峰谷标记</th>
+                    </tr>
+                  </thead>
+                  <tbody id="forecastTableBody" class="divide-y divide-line"></tbody>
+                </table>
+              </div>
+            </div>
+            <div class="col-span-4 space-y-3" id="forecastMetricCards"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="page-decision" class="page-section hidden">
+      <div class="rounded-panel border border-white/70 bg-white/85 p-6 shadow-card">
+        <div class="flex items-start justify-between">
+          <div>
+            <h2 class="text-[24px] font-semibold">智能决策建议模块</h2>
+            <p class="mt-2 text-[14px] text-slate-500">根据预测结果自动生成工业、居民、储能等场景的建议。</p>
+          </div>
+          <button id="exportDecisionBtn" class="rounded-panel bg-primary px-4 py-2 text-sm font-medium text-white">导出决策报告</button>
+        </div>
+        <div class="mt-6 rounded-panel bg-gradient-to-r from-primary to-[#5A94FF] p-5 text-white">
+          <div id="decisionOverview" class="text-lg font-semibold leading-8"></div>
+        </div>
+        <div class="mt-6 flex gap-3">
+          <button class="scene-btn rounded-full bg-primary px-4 py-2 text-sm font-medium text-white" data-scene="industrial">工业用电</button>
+          <button class="scene-btn rounded-full bg-bgsoft px-4 py-2 text-sm text-slate-500" data-scene="residential">居民用电</button>
+          <button class="scene-btn rounded-full bg-bgsoft px-4 py-2 text-sm text-slate-500" data-scene="storage">储能电站</button>
+        </div>
+        <div id="decisionCards" class="mt-6 grid grid-cols-3 gap-4"></div>
+      </div>
+    </section>
+
+    <section id="page-compare" class="page-section hidden">
+      <div class="rounded-panel border border-white/70 bg-white/85 p-6 shadow-card">
+        <div class="flex items-start justify-between">
+          <div>
+            <h2 class="text-[24px] font-semibold">模型对比模块</h2>
+            <p class="mt-2 text-[14px] text-slate-500">对比 LSTM、XGBoost、LightGBM 和随机森林的综合表现。</p>
+          </div>
+        </div>
+        <div class="mt-6 grid grid-cols-12 gap-6">
+          <div class="col-span-7 rounded-panel border border-line bg-white p-4">
+            <h3 class="mb-3 text-[16px] font-semibold">模型指标柱状图</h3>
+            <div class="h-[280px]" id="compareBarChartWrap"><canvas id="compareBarChart"></canvas></div>
+          </div>
+          <div class="col-span-5 rounded-panel border border-line bg-white p-4">
+            <h3 class="mb-3 text-[16px] font-semibold">综合能力雷达图</h3>
+            <div class="h-[280px]" id="compareRadarChartWrap"><canvas id="compareRadarChart"></canvas></div>
+          </div>
+        </div>
+        <div class="mt-6 overflow-hidden rounded-panel border border-line bg-white">
+          <table class="min-w-full text-sm">
+            <thead class="bg-bgsoft text-left text-slate-500">
+              <tr>
+                <th class="px-3 py-3">模型</th>
+                <th class="px-3 py-3">MAE</th>
+                <th class="px-3 py-3">RMSE</th>
+                <th class="px-3 py-3">R²</th>
+                <th class="px-3 py-3">预测速度</th>
+                <th class="px-3 py-3">适用说明</th>
+              </tr>
+            </thead>
+            <tbody id="compareTableBody" class="divide-y divide-line"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <section id="page-about" class="page-section hidden">
+      <div class="grid grid-cols-12 gap-6">
+        <div class="col-span-7 rounded-panel border border-white/70 bg-white/85 p-6 shadow-card">
+          <h2 class="text-[24px] font-semibold">导出中心</h2>
+          <div class="mt-6 space-y-4">
+            <button id="exportHistoryBtn" class="block w-full rounded-panel border border-line bg-white px-4 py-3 text-left text-sm">导出历史数据 CSV</button>
+            <button id="exportForecastBtn" class="block w-full rounded-panel border border-line bg-white px-4 py-3 text-left text-sm">导出预测结果 CSV</button>
+            <button id="exportChartsBtn" class="block w-full rounded-panel border border-line bg-white px-4 py-3 text-left text-sm">导出关键图表 PNG</button>
+          </div>
+        </div>
+        <div class="col-span-5 rounded-panel border border-white/70 bg-white/85 p-6 shadow-card">
+          <h2 class="text-[24px] font-semibold">系统设置</h2>
+          <div class="mt-6 space-y-4">
+            <select id="themeSelect" class="w-full rounded-panel border border-line bg-white px-3 py-2.5 text-sm">
+              <option value="light">浅色主题</option>
+              <option value="dark">深色主题</option>
+            </select>
+            <div>
+              <label class="mb-2 block text-sm text-slate-500">字体大小</label>
+              <input id="fontSizeRange" type="range" min="14" max="18" value="16" class="w-full accent-primary" />
+            </div>
+            <select id="refreshSelect" class="w-full rounded-panel border border-line bg-white px-3 py-2.5 text-sm">
+              <option value="30">30 秒刷新</option>
+              <option value="60">60 秒刷新</option>
+            </select>
+            <div class="rounded-panel border border-line bg-bgsoft p-4">
+              <div class="mb-2 flex justify-between text-xs text-slate-500">
+                <span id="exportStatusText">导出中心待命中</span>
+                <span id="exportPercentText">0%</span>
+              </div>
+              <div class="h-2 rounded-full bg-white">
+                <div id="exportProgressBar" class="h-2 rounded-full bg-gradient-to-r from-primary to-mint" style="width:0%"></div>
+              </div>
+            </div>
+            <div class="rounded-panel border border-line bg-white p-4">
+              <p class="text-xs text-slate-400">依赖声明</p>
+              <div class="mt-2 text-sm font-medium text-slate-900">Chart.js <span id="chartVersionLabel">4.4.1</span></div>
+              <p class="mt-2 text-xs leading-6 text-slate-500">页面使用 Chart.js CDN 引入图表能力，适合比赛展示和快速复现。</p>
+            </div>
+            <div class="rounded-panel border border-line bg-white p-4">
+              <p class="text-xs text-slate-400">作品信息</p>
+              <div class="mt-2 text-sm font-medium text-slate-900">智能电价预测与决策系统</div>
+              <p class="mt-2 text-xs leading-6 text-slate-500">当前源码包已补充运行方式、依赖、模块结构、截图目录和比赛文档目录。</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="fixed inset-x-0 bottom-0 z-30 flex justify-between border-t border-white/60 bg-white/85 px-6 py-2 text-xs text-slate-400 backdrop-blur">
+    <span>当前时间：<span id="currentTime">--</span></span>
+    <span>数据更新时间：<span id="updateTime">--</span></span>
+    <span>系统版本：V2.0.0</span>
+  </footer>
+
+  <script type="module" src="./js/app.js"></script>
+</body>
+</html>
